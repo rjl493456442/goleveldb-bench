@@ -10,9 +10,9 @@ import (
 )
 
 type ReadConfig struct {
-	Size     int `json:"size"`     // testing dataset size(pre-constructed)
-	KeySize  int `json:"keysize"`  // size of each testing key
-	DataSize int `json:"datasize"` // size of each testing value
+	Size     uint64 `json:"size"`     // testing dataset size(pre-constructed)
+	KeySize  uint64 `json:"keysize"`  // size of each testing key
+	DataSize uint64 `json:"datasize"` // size of each testing value
 
 	LogPercent bool   `json:"-"`
 	TestName   string `json:"-"`
@@ -59,7 +59,7 @@ func (env *ReadEnv) Run(write func(key, value string, lastCall bool) error, read
 
 	var (
 		err      error
-		written  = 0
+		written  = uint64(0)
 		keypool  [][]byte
 		wg       sync.WaitGroup
 		result   = make(chan [][]byte, 100)
@@ -153,11 +153,11 @@ func (env *ReadEnv) readKey(result chan [][]byte, shutdown chan struct{}, wg *sy
 			return
 		}
 		batchKey = batchKey[:0]
-		for i := 0; i < read; i += env.cfg.KeySize {
-			if i+env.cfg.KeySize >= read {
+		for i := 0; i < read; i += int(env.cfg.KeySize) {
+			if i+int(env.cfg.KeySize) >= read {
 				break
 			}
-			batchKey = append(batchKey, buffer[i:i+env.cfg.KeySize])
+			batchKey = append(batchKey, buffer[i:i+int(env.cfg.KeySize)])
 		}
 		select {
 		case result <- batchKey:

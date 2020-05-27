@@ -12,9 +12,9 @@ import (
 const emitInterval = 500 * 1024 // bytes
 
 type WriteConfig struct {
-	Size     int `json:"size"`     // total size of values to write
-	KeySize  int `json:"keysize"`  // size of each key written
-	DataSize int `json:"datasize"` // size of each value written
+	Size     uint64 `json:"size"`     // total size of values to write
+	KeySize  uint64 `json:"keysize"`  // size of each key written
+	DataSize uint64 `json:"datasize"` // size of each value written
 
 	LogPercent bool   `json:"-"`
 	TestName   string `json:"-"`
@@ -47,7 +47,7 @@ func NewWriteEnv(output io.Writer, cfg WriteConfig) *WriteEnv {
 // data has actually been flushed to disk.
 func (env *WriteEnv) Run(write func(key, value string, lastCall bool) error) error {
 	env.start()
-	written := 0
+	written := uint64(0)
 	for {
 		env.rand.Read(env.key)
 		env.rand.Read(env.value)
