@@ -155,7 +155,7 @@ var tests = map[string]tester{
 }
 
 func testnames() (n []string) {
-	for name, _ := range tests {
+	for name := range tests {
 		n = append(n, name)
 	}
 	sort.Strings(n)
