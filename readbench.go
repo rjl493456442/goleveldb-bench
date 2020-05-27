@@ -35,7 +35,6 @@ type ReadEnv struct {
 	startTime, lastTime time.Duration
 	read, lastRead      int
 	lastPercent         int
-	miss                int
 }
 
 func NewReadEnv(log io.Writer, kr io.Reader, kw io.Writer, resetKey func(), cfg ReadConfig) *ReadEnv {
@@ -83,16 +82,19 @@ func (env *ReadEnv) Run(write func(key, value string, lastCall bool) error, read
 			end := written >= env.cfg.Size
 			err = write(string(env.key), string(env.value), end)
 			if err != nil || end {
+				if err == nil {
+					keypool = append(keypool, copyBytes(env.key))
+				}
 				if len(keypool) > 0 {
 					env.keych <- keypool
-					keypool = keypool[:0]
+					keypool = make([][]byte, 0)
 				}
 				break stageOne
 			}
 			keypool = append(keypool, copyBytes(env.key))
 			if len(keypool) > 1024 {
 				env.keych <- keypool
-				keypool = keypool[:0]
+				keypool = make([][]byte, 0)
 			}
 		}
 		if err != nil {
@@ -116,7 +118,6 @@ stageTwo:
 	if err != nil {
 		return err
 	}
-	fmt.Println("Total miss", env.miss)
 	return nil
 }
 
@@ -139,10 +140,7 @@ func (env *ReadEnv) writeKey(shutdown chan struct{}, wg *sync.WaitGroup) {
 func (env *ReadEnv) readKey(result chan [][]byte, shutdown chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	var (
-		buffer   = make([]byte, env.cfg.KeySize*1024)
-		batchKey = make([][]byte, 1024)
-	)
+	var buffer = make([]byte, env.cfg.KeySize*1024)
 	if env.resetKey != nil {
 		env.resetKey()
 	}
@@ -152,12 +150,9 @@ func (env *ReadEnv) readKey(result chan [][]byte, shutdown chan struct{}, wg *sy
 			close(result)
 			return
 		}
-		batchKey = batchKey[:0]
-		for i := 0; i < read; i += int(env.cfg.KeySize) {
-			if i+int(env.cfg.KeySize) >= read {
-				break
-			}
-			batchKey = append(batchKey, buffer[i:i+int(env.cfg.KeySize)])
+		var batchKey = make([][]byte, read/int(env.cfg.KeySize))
+		for i := 0; i+int(env.cfg.KeySize) <= read; i += int(env.cfg.KeySize) {
+			batchKey[i/int(env.cfg.KeySize)] = copyBytes(buffer[i : i+int(env.cfg.KeySize)])
 		}
 		select {
 		case result <- batchKey:
@@ -192,12 +187,6 @@ func (env *ReadEnv) Progress(w int) {
 		env.lastTime = now
 		env.lastRead = env.read
 	}
-}
-
-func (env *ReadEnv) RecordMiss() {
-	env.mu.Lock()
-	defer env.mu.Unlock()
-	env.miss += 1
 }
 
 func (env *ReadEnv) logPercentage() {

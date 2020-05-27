@@ -1,11 +1,13 @@
 package bench
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestParseSize(t *testing.T) {
 	tests := []struct {
 		in string
-		v  int
+		v  uint64
 	}{
 		{"82", 82},
 		{"82b", 82},

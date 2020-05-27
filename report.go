@@ -77,3 +77,12 @@ func copyBytes(b []byte) (copiedBytes []byte) {
 	copy(copiedBytes, b)
 	return
 }
+
+// copySlices returns an exact copy of the provided slices.
+func copySlices(s [][]byte) (copiedSlice [][]byte) {
+	copiedSlice = make([][]byte, len(s))
+	for i := 0; i < len(s); i++ {
+		copy(copiedSlice[i], s[i])
+	}
+	return
+}
