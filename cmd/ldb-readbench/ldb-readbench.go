@@ -138,6 +138,10 @@ var tests = map[string]Benchmarker{
 		BlockCacheCapacity: 100 * opt.MiB,
 		Filter:             filter.NewBloomFilter(10),
 	}},
+	"random-read-metacache-filter": randomRead{Options: opt.Options{
+		MetadataCacheCapacity: 100 * opt.MiB,
+		Filter:                filter.NewBloomFilter(10),
+	}},
 }
 
 func testnames() (n []string) {

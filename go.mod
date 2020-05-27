@@ -14,3 +14,5 @@ require (
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
 	gonum.org/v1/plot v0.7.0
 )
+
+replace github.com/syndtr/goleveldb => github.com/rjl493456442/goleveldb v0.0.0-20200526114915-f64b2e1ef944
