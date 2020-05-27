@@ -13,8 +13,8 @@ import (
 )
 
 type Progress struct {
-	Processed int           `json:"processed"` // total bytes read or written so far
-	Delta     int           `json:"delta"`     // bytes written since last event
+	Processed uint64        `json:"processed"` // total bytes read or written so far
+	Delta     uint64        `json:"delta"`     // bytes written since last event
 	Duration  time.Duration `json:"duration"`  // time in ns since last event
 }
 

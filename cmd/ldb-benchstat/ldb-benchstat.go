@@ -16,7 +16,7 @@ func main() {
 		var (
 			bps       []float64
 			totalTime float64
-			totalSize int
+			totalSize uint64
 		)
 		for _, ev := range r.Events {
 			bps = append(bps, ev.BPS())

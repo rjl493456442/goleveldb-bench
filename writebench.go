@@ -29,7 +29,7 @@ type WriteEnv struct {
 	// reporting
 	mu                   sync.Mutex
 	startTime, lastTime  time.Duration
-	written, lastWritten int
+	written, lastWritten uint64
 	lastPercent          int
 }
 
@@ -72,7 +72,7 @@ func (env *WriteEnv) Progress(w int) {
 	now := mononow()
 	env.mu.Lock()
 	defer env.mu.Unlock()
-	env.written += w
+	env.written += uint64(w)
 	d := now - env.lastTime
 	dw := env.written - env.lastWritten
 	if dw > 0 && dw > emitInterval {

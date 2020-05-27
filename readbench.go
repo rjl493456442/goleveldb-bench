@@ -33,7 +33,7 @@ type ReadEnv struct {
 	// reporting
 	mu                  sync.Mutex
 	startTime, lastTime time.Duration
-	read, lastRead      int
+	read, lastRead      uint64
 	lastPercent         int
 }
 
@@ -177,7 +177,7 @@ func (env *ReadEnv) Progress(w int) {
 	now := mononow()
 	env.mu.Lock()
 	defer env.mu.Unlock()
-	env.read += w
+	env.read += uint64(w)
 	d := now - env.lastTime
 	dw := env.read - env.lastRead
 	if dw > 0 && dw > emitInterval {
