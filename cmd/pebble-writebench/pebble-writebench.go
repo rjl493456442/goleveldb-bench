@@ -147,7 +147,7 @@ func (b seqWrite) Benchmark(dir string, env *bench.WriteEnv) error {
 	}
 	defer db.Close()
 	return env.Run(func(key, value string, lastCall bool) error {
-		if err := db.Set([]byte(key), []byte(value), nil); err != nil {
+		if err := db.Set([]byte(key), []byte(value), &pebble.WriteOptions{Sync: false}); err != nil {
 			return err
 		}
 		env.Progress(len(value))
