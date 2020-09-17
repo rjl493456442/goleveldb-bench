@@ -10,6 +10,7 @@ import (
 	_ "net/http/pprof"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -122,7 +123,12 @@ type Benchmarker interface {
 }
 
 var tests = map[string]Benchmarker{
-	"nobatch":     seqWrite{},
+	"nobatch": seqWrite{},
+	"nobatch-concurrenct-compaction": seqWrite{Options: &pebble.Options{
+		MaxOpenFiles:             4096,
+		MemTableSize:             256 * 1024 * 1024,
+		MaxConcurrentCompactions: runtime.NumCPU(),
+	}},
 	"batch-100kb": batchWrite{BatchSize: 100 * opt.KiB},
 	"batch-1mb":   batchWrite{BatchSize: opt.MiB},
 	"batch-5mb":   batchWrite{BatchSize: 5 * opt.MiB},
